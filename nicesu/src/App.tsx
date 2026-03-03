@@ -1,9 +1,10 @@
 import { Routes, Route } from "react-router-dom";
-import { useState } from "react"; 
+import { useState } from "react";
 import Navbar from "./Component/Navbar";
 import Home from "./pages/Home";
 import Cart from "./pages/Cart";
 import Products from "./pages/Products";
+import AdminOrders from "./admin/pages/AdminOrders";
 
 function App() {
   const [searchTerm, setSearchTerm] = useState(""); 
@@ -19,7 +20,9 @@ function App() {
           element={<Products searchTerm={searchTerm} />}
         />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/admin" element={<AdminOrders />} />
       </Routes>
+      
     </>
   );
 }

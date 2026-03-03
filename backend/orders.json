@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1772519216591,
+    "status": "APPROVED",
+    "createdAt": "2026-03-03T06:26:56.591Z",
+    "items": [
+      {
+        "product": {
+          "id": 1,
+          "name": "Nike Air Max 270",
+          "price": 180,
+          "image": "/public/images/sneakers/Nike.jpg"
+        },
+        "quantity": 1
+      }
+    ],
+    "customerName": "Guest User",
+    "total": 180,
+    "payment": "COD",
+    "rejectionReason": "Rejected by admin",
+    "updatedAt": "2026-03-03T06:27:18.926Z"
+  },
+  {
+    "id": 1772519246607,
+    "status": "PENDING",
+    "createdAt": "2026-03-03T06:27:26.607Z",
+    "items": [
+      {
+        "product": {
+          "id": 1,
+          "name": "Nike Air Max 270",
+          "price": 180,
+          "image": "/public/images/sneakers/Nike.jpg"
+        },
+        "quantity": 2
+      }
+    ],
+    "customerName": "Guest User",
+    "total": 360,
+    "payment": "COD"
+  }
+]
