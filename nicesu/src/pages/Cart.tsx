@@ -1,7 +1,7 @@
 import { useCart } from "../Context/CartContext";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
-import { products } from "../data/products";
+import { products } from "../data/Products";
 import { useOrders } from "../Context/OrderContext";
 
 const Cart = () => {
@@ -13,14 +13,13 @@ const Cart = () => {
   const [showNotif, setShowNotif] = useState(false);
 
   const total = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
-  
+
   const { createOrder } = useOrders();
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
 
-    const newOrder: Order = {
-      id: Date.now(),
+    const newOrder = {
       items: cart.map((item) => ({
         product: item.product,
         quantity: item.quantity,
@@ -28,7 +27,7 @@ const Cart = () => {
       customerName: "Guest User",
       total,
       payment,
-      status: "PENDING",
+      status: "PENDING" as const,
       createdAt: new Date().toISOString(),
     };
 
@@ -68,11 +67,19 @@ const Cart = () => {
 
                   <div>
                     <h2 className="text-xl font-semibold">
-
                       {item.product.name}
                     </h2>
+
                     <p className="text-gray-400">
-                      ${item.product.price}
+                      Price: ${item.product.price}
+                    </p>
+
+                    <p className="text-gray-400">
+                      Qty: {item.quantity}
+                    </p>
+
+                    <p className="text-gray-400 font-semibold">
+                      Subtotal: ${(item.product.price * item.quantity).toLocaleString()}
                     </p>
                   </div>
                 </div>
