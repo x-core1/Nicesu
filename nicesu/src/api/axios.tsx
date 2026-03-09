@@ -1,7 +1,7 @@
-import axios from "axios";
+import axios from "axios"
 
-const API = axios.create({
-  baseURL: "http://localhost:5000",
-});
+const instance = axios.create({
+  baseURL: "https://crud-api-production-6ec0.up.railway.app",
+})
 
-export default API;
+export default instance

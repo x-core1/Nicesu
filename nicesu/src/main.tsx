@@ -9,11 +9,11 @@ import { OrderProvider } from "./Context/OrderContext";
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-    <OrderProvider>
-     <CartProvider>
-        <App />
-     </CartProvider>
-    </OrderProvider>
+      <OrderProvider>
+        <CartProvider>
+          <App />
+        </CartProvider>
+      </OrderProvider>
     </BrowserRouter>
   </StrictMode>,
 )

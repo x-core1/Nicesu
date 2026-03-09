@@ -1,75 +1,81 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import type { Order } from "../types/order";
-import {
-  getOrders,
-  createOrder as createOrderService,
-  updateOrderStatus as updateOrderStatusService,
-} from "../api/order.service";
+import { createContext, useContext } from "react";
+import type { Product } from "../types/product";
+import axios from "../api/axios";
 
-interface OrderContextType {
-  orders: Order[];
-  createOrder: (order: Omit<Order, "id">) => Promise<void>;
-  refreshOrders: () => Promise<void>;
-  updateOrderStatus: (
-    id: number,
-    status: Order["status"],
-    options?: {
-      shippingDate?: string;
-      rejectionReason?: string;
-    }
-  ) => Promise<void>;
+export type OrderItem = {
+  product_id: number;
+  quantity: number;
+  price: number;
+  product: Product
+};
+
+export type Order = {
+  ID: number;
+  customer_name: string;
+  items: OrderItem[];
+  total: number;
+  payment_method: string;
+  status: "pending" | "paid" | "shipped" | "completed" | "rejected";
+  CreatedAt: string;
+};
+
+export type CreateOrderPayload = {
+  customer_name: string;
+  items: CreateOrderItem[];
+  payment_method: string;
+};
+
+export type CreateOrderItem = {
+  product_id: number
+  quantity: number
 }
 
-const OrderContext = createContext<OrderContextType | undefined>(undefined);
+type OrderContextType = {
+  createOrder: (payload: CreateOrderPayload) => Promise<Order>;
+  getOrders: () => Promise<Order[]>;
+  updateStatus: (id: number, status: Order["status"]) => Promise<void>;
+};
+
+const OrderContext = createContext<OrderContextType | null>(null);
 
 export const OrderProvider = ({ children }: { children: React.ReactNode }) => {
-  const [orders, setOrders] = useState<Order[]>([]);
 
-  const refreshOrders = async () => {
-    try {
-      const data = await getOrders();
-      setOrders(data);
-    } catch (err) {
-      console.error("FAILED TO FETCH ORDERS:", err);
-    }
+  const createOrder = async (payload: CreateOrderPayload) => {
+    const res = await axios.post("/orders", payload);
+    return res.data;
   };
 
-  const createOrder = async (order: Omit<Order, "id">) => {
-    try {
-      await createOrderService(order);
-      await refreshOrders();
-    } catch (err) {
-      console.error("FAILED TO CREATE ORDER:", err);
-    }
+  const getOrders = async () => {
+    const res = await axios.get("/orders");
+    return res.data;
   };
 
-  const updateOrderStatus = async (
-    id: number,
-    status: Order["status"],
-    options?: {
-      shippingDate?: string;
-      rejectionReason?: string;
+  const updateStatus = async (id: number, status: Order["status"]) => {
+
+    if (status === "shipped") {
+      await axios.put(`/orders/${id}/ship`);
+      return;
     }
-  ) => {
-    try {
-      await updateOrderStatusService(id, status, options);
-      await refreshOrders();
-    } catch (err) {
-      console.error("FAILED TO UPDATE ORDER:", err);
+
+    if (status === "completed") {
+      await axios.put(`/orders/${id}/complete`);
+      return;
+    }
+
+    if (status === "rejected") {
+      await axios.put(`/orders/${id}/reject`, {
+        reason: "Rejected by admin",
+      });
+      return;
     }
   };
-
-  useEffect(() => {
-    refreshOrders();
-  }, []);
 
   return (
     <OrderContext.Provider
       value={{
-        orders,
         createOrder,
-        refreshOrders,
-        updateOrderStatus,
+        getOrders,
+        updateStatus,
       }}
     >
       {children}
@@ -79,8 +85,10 @@ export const OrderProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useOrders = () => {
   const context = useContext(OrderContext);
+
   if (!context) {
     throw new Error("useOrders must be used inside OrderProvider");
   }
+
   return context;
 };

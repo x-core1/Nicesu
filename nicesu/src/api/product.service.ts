@@ -1,33 +1,20 @@
-import type { Product } from "../types/product";
-import { products as initialProducts } from "../data/products";
+import axios from "./axios"
+import type { Product } from "../types/product"
 
-let products: Product[] = [...initialProducts];
+const BASE_URL: string = "https://crud-api-production-6ec0.up.railway.app"
 
-export const getProducts = async (): Promise<Product[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve([...products]), 300);
-  });
-};
+export const getProducts = () => {
+  return axios.get<Product[]>(`${BASE_URL}/products`)
+}
 
-export const addProduct = async (newProduct: Product): Promise<Product> => {
-  return new Promise((resolve) => {
-    products.push(newProduct);
-    resolve(newProduct);
-  });
-};
+export const createProduct = (data: Omit<Product, "id">) => {
+  return axios.post(`${BASE_URL}/products`, data)
+}
 
-export const deleteProduct = async (id: number): Promise<void> => {
-  return new Promise((resolve) => {
-    products = products.filter((p) => p.id !== id);
-    resolve();
-  });
-};
+export const updateProduct = (id: number, data: Partial<Product>) => {
+  return axios.put(`${BASE_URL}/products/${id}`, data)
+}
 
-export const updateProduct = async (updated: Product): Promise<Product> => {
-  return new Promise((resolve) => {
-    products = products.map((p) =>
-      p.id === updated.id ? updated : p
-    );
-    resolve(updated);
-  });
-};
+export const deleteProduct = (id: number) => {
+  return axios.delete(`${BASE_URL}/products/${id}`)
+}

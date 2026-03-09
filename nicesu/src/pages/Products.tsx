@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCart } from "../Context/CartContext";
 import { getProducts } from "../api/product.service";
 import type { Product } from "../types/product";
@@ -15,24 +15,42 @@ const Products = ({ searchTerm }: ProductsProps) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchProducts = async () => {
       try {
-        const data = await getProducts();
-        setProducts(data);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to fetch products");
+        setLoading(true);
+        const response = await getProducts();
+        const data = response?.data ?? [];
+        setProducts(Array.isArray(data) ? data : []);
+
+        if (isMounted) {
+          // Kalau API return null → ubah jadi array kosong
+          setProducts(Array.isArray(data) ? data : []);
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          setError(err.message || "Failed to fetch products");
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchProducts();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) =>
+      product.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [products, searchTerm]);
 
   if (loading) {
     return (
@@ -50,6 +68,14 @@ const Products = ({ searchTerm }: ProductsProps) => {
     );
   }
 
+  if (filteredProducts.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500 text-lg">No products found</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 px-10 py-12">
       <h1 className="text-3xl font-bold mb-8">Our Products</h1>
@@ -61,14 +87,24 @@ const Products = ({ searchTerm }: ProductsProps) => {
             className="bg-white rounded-2xl shadow-md p-4 hover:shadow-xl transition duration-300 flex flex-col"
           >
             <img
-              src={product.image}
+              src={product.image || "/placeholder.jpg"}
               alt={product.name}
               className="rounded-xl mb-4 w-full h-[400px] object-cover"
             />
 
             <h2 className="font-semibold text-lg">{product.name}</h2>
+
+            <p>
+              {product.stock > 0 ? (
+                <span className="text-green-600 font-medium">
+                  In Stock ({product.stock})
+                </span>
+              ) : (
+                <span className="text-red-600 font-medium">Out of Stock</span>
+              )}
+            </p>
             <p className="text-gray-600 mb-4">
-              ${product.price.toLocaleString()}
+              ${Number(product.price).toLocaleString()}
             </p>
 
             <div className="flex gap-2 mt-auto">
