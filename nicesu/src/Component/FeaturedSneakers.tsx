@@ -1,5 +1,5 @@
 import { useCart } from "../Context/CartContext";
-import { Product } from "../types/product";
+import type { Product } from "../types/product";
 
 const products = [
 
